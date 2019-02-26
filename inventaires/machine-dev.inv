@@ -1,6 +1,5 @@
-<?php
 [Debian9Developpement]
-172.16.206.182 ansible_user=root
+172.16.206.188 ansible_user=root
         
 [Debian9Developpement:vars]
 mysql_user=eleve

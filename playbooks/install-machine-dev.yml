@@ -1,4 +1,3 @@
-#installation d'Apache sur le serveur de développement
 - name: "Installation d'Apache"
   hosts: all
   tasks:
@@ -25,7 +24,7 @@
           state: present
         
       - name: Installation 
-        apt :
+        apt_repository :
           repo : deb https://packages.sury.org/php/ stretch main
           state: present
           update_cache: yes
@@ -35,9 +34,14 @@
           name : php7.2
           state : present
         
-      - name: Installation de Mysql 
-        hosts: all
-        tasks:
+- name: Installation de Mysql 
+  hosts: all
+  tasks:
+     
+      - name : Installation de python-pip
+        apt :  
+          name : python-pip
+          state : present    
             
       - name: Installer le module Python pour Mysql
         pip:
@@ -57,7 +61,48 @@
       - name: Création de l'utilisateur eleve et affectation des privilèges sur une base de données
         mysql_user:
          name: "{{mysql_user}}"
-        password: "{{mysql_password}}"
-        host: localhost
-        priv: "{{mysql_db}}.*:ALL,GRANT"
-        login_unix_socket: /var/run/mysqld/mysqld.sock
+         password: "{{mysql_password}}"
+         host: localhost
+         priv: "{{mysql_db}}.*:ALL,GRANT"
+         login_unix_socket: /var/run/mysqld/mysqld.sock
+         
+- name: PHPMYADMIN Installation
+  hosts: all
+  tasks:   
+            
+      - name : Installation de debconf-utils
+        apt :  
+          name : debconf-utils
+          state : present
+          
+      - name: Installation de dbconfig
+        debconf: 
+            name: phpmyadmin 
+            question: phpmyadmin/dbconfig-install 
+            value: true 
+            vtype: boolean
+          
+            name: phpmyadmin
+            question: phpmyadmin/app-password-confirm
+            value: btsinfo 
+            vtype: password
+        
+            name: phpmyadmin
+            question: phpmyadmin/mysql/admin-pass
+            value: btsinfo 
+            vtype: password
+          
+            name: phpmyadmin
+            question: phpmyadmin/mysql/app-pass
+            value: btsinfo 
+            vtype: password
+          
+            name: phpmyadmin
+            question: phpmyadmin/reconfigure-webserve
+            value: apache2 
+            vtype: multiselect
+          
+      - name : Installation de PhpMyAdmin
+        apt :  
+          name : phpmyadmin
+          state : present
