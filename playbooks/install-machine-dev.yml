@@ -4,33 +4,60 @@
   tasks:
       - name: Inscrire le nouveau dépôt
         apt_repository:
-         repo: deb http://ftp.fr.debian.org/debian/ stretch main
-         state: present
-         update_cache: yes
+           repo: deb http://ftp.fr.debian.org/debian/ stretch main
+           state: present
+           update_cache: yes
          
       - name: Installation d'apache2 
         apt:
-        name: apache2,ca-certificates,apt-transport-https
-        state: present 
+          name: apache2,ca-certificates,apt-transport-https
+          state: present 
         
       - name: Démarrer le service Apache
         service:
-        name: apache2
-        state: started
-        enabled: yes
+          name: apache2
+          state: started
+          enabled: yes
         
       - name: Enregistrer une clé
         apt_key:
-        url: https://packages.sury.org/php/apt.gpg
-        state: present
+          url: https://packages.sury.org/php/apt.gpg
+          state: present
         
       - name: Installation 
         apt :
-        repo : deb https://packages.sury.org/php/ stretch main
-        state: present
-        update_cache: yes
+          repo : deb https://packages.sury.org/php/ stretch main
+          state: present
+          update_cache: yes
         
       - name : Installation de PHP7
-        apt :
-        name : php7.2
-        state : present
+        apt :  
+          name : php7.2
+          state : present
+        
+      - name: Installation de Mysql 
+        hosts: all
+        tasks:
+            
+      - name: Installer le module Python pour Mysql
+        pip:
+          name: PyMySQL
+        
+      - name: Installation de python-mysqldb, mysqlserveur
+        apt:
+          name: python-mysqldb,mysql-server
+          state: present 
+      
+      - name: Création d'une base de données    
+        mysql_db:    
+         name: "{{mysql_db}}"
+         state: present  
+         login_unix_socket: /var/run/mysqld/mysqld.sock  
+      
+      - name: Création de l'utilisateur eleve et affectation des privilèges sur une base de données
+        mysql_user:
+         name: "{{mysql_user}}"
+        password: "{{mysql_password}}"
+        host: localhost
+        priv: "{{mysql_db}}.*:ALL,GRANT"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
